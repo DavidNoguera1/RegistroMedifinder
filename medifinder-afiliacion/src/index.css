@@ -11,3 +11,8 @@
     @apply text-xl font-semibold text-primary border-b pb-2;
   }
 }
+
+
+.fondo {
+  background-color: #c6ffec; 
+}
