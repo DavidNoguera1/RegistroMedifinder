@@ -2,7 +2,7 @@ import Input from '../common/Input'
 import { useForm } from '../../contexts/FormContext'
 
 const departments = [
-  'Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bolívar', 'Boyacá',
+  'Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bogotá D.C.', 'Bolívar', 'Boyacá',
   'Caldas', 'Caquetá', 'Casanare', 'Cauca', 'Cesar', 'Chocó', 'Córdoba',
   'Cundinamarca', 'Guainía', 'Guaviare', 'Huila', 'La Guajira', 'Magdalena',
   'Meta', 'Nariño', 'Norte de Santander', 'Putumayo', 'Quindío', 'Risaralda',
@@ -11,9 +11,39 @@ const departments = [
 ]
 
 const citiesByDepartment = {
+'Amazonas': ['Leticia'],
   'Antioquia': ['Medellín', 'Bello', 'Itagüí', 'Envigado', 'Rionegro'],
+  'Arauca': ['Arauca'],
+  'Atlántico': ['Barranquilla'],
   'Bogotá D.C.': ['Bogotá'],
+  'Bolívar': ['Cartagena'],
+  'Boyacá': ['Tunja'],
+  'Caldas': ['Manizales'],
+  'Caquetá': ['Florencia'],
+  'Casanare': ['Yopal'],
+  'Cauca': ['Popayán'],
+  'Cesar': ['Valledupar'],
+  'Chocó': ['Quibdó'],
+  'Córdoba': ['Montería'],
+  'Cundinamarca': ['Soacha'],
+  'Guainía': ['Inírida'],
+  'Guaviare': ['San José del Guaviare'],
+  'Huila': ['Neiva'],
+  'La Guajira': ['Riohacha'],
+  'Magdalena': ['Santa Marta'],
+  'Meta': ['Villavicencio'],
+  'Nariño': ['Pasto'],
+  'Norte de Santander': ['Cúcuta'],
+  'Putumayo': ['Mocoa'],
+  'Quindío': ['Armenia'],
+  'Risaralda': ['Pereira'],
+  'San Andrés': ['San Andrés'],
+  'Santander': ['Bucaramanga'],
+  'Sucre': ['Sincelejo'],
+  'Tolima': ['Ibagué'],
   'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'Tuluá'],
+  'Vaupés': ['Mitú'],
+  'Vichada': ['Puerto Carreño']
 }
 
 const PharmacyInfo = () => {
