@@ -24,10 +24,11 @@ const FormLayout = () => {
       setModalInfo({
         isOpen: true,
         title: 'Formulario Incompleto',
-        description: 'Por favor complete todos los campos requeridos antes de continuar.',
+        description: `Por favor corrija los siguientes errores: ${errors.join(', ')}`,
       });
       return;
     }
+
     setValidationErrors([]);
     setStep(prev => Math.min(prev + 1, totalSteps));
   };
@@ -36,8 +37,8 @@ const FormLayout = () => {
 
   const validateCurrentStep = () => {
     const errors = [];
-    
-    switch(step) {
+
+    switch (step) {
       case 1:
         if (!formData.pharmacyName?.trim()) errors.push('Nombre de la farmacia');
         if (!formData.nit?.trim()) errors.push('NIT');
@@ -46,26 +47,43 @@ const FormLayout = () => {
         if (!formData.city?.trim()) errors.push('Ciudad');
         if (!formData.phone?.trim()) errors.push('Teléfono');
         if (!formData.email?.trim()) errors.push('Email');
+
+        const existingPharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
+        const duplicateNIT = existingPharmacies.some(p => p.nit === formData.nit);
+        if (duplicateNIT) {
+          errors.push('El NIT ya está registrado y en proceso de aprobación.');
+        }
         break;
+
       case 2:
-        if (!formData.representativeId?.trim()) errors.push('Cédula del representante legal');
+        if (!formData.representativeId?.trim()) {
+          errors.push('Cédula del representante legal');
+        } else {
+          const legalReps = JSON.parse(localStorage.getItem('legalRepresentatives')) || ['1234567890'];
+          const exists = legalReps.includes(formData.representativeId);
+          if (!exists) {
+            errors.push('El representante legal no está registrado.');
+          }
+        }
         break;
+
       case 3:
         if (!formData.commerceRegistry) errors.push('Registro de cámara de comercio');
         if (!formData.operationLicense) errors.push('Licencia de funcionamiento');
         if (!formData.sanitaryRegistry) errors.push('Registro sanitario');
         break;
+
       default:
         break;
     }
-    
+
     return errors;
   };
 
   const isFormEmpty = () => {
     return Object.values(formData).every(
-      value => value === null || value === undefined || value === '' || 
-              (typeof value === 'object' && value !== null && Object.keys(value).length === 0)
+      value => value === null || value === undefined || value === '' ||
+        (typeof value === 'object' && value !== null && Object.keys(value).length === 0)
     );
   };
 
@@ -85,7 +103,6 @@ const FormLayout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar si el formulario está completamente vacío
     if (isFormEmpty()) {
       setModalInfo({
         isOpen: true,
@@ -95,19 +112,17 @@ const FormLayout = () => {
       return;
     }
 
-    // Validar campos requeridos
     const errors = validateCurrentStep();
     if (errors.length > 0) {
       setValidationErrors(errors);
       setModalInfo({
         isOpen: true,
         title: 'Formulario Incompleto',
-        description: `Los siguientes campos son requeridos: ${errors.join(', ')}`,
+        description: `Los siguientes campos son requeridos o inválidos: ${errors.join(', ')}`,
       });
       return;
     }
 
-    // Solo verificar duplicados si estamos en el paso final
     if (step === totalSteps) {
       const existingPharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
       const nits = existingPharmacies.map(pharmacy => pharmacy.nit);
@@ -121,7 +136,6 @@ const FormLayout = () => {
         return;
       }
 
-      // Convertir archivos a Base64
       try {
         const [commerceRegistryB64, operationLicenseB64, sanitaryRegistryB64] = await Promise.all([
           convertFileToBase64(formData.commerceRegistry),
@@ -136,11 +150,9 @@ const FormLayout = () => {
           sanitaryRegistry: sanitaryRegistryB64,
         };
 
-        // Guardar en localStorage
         const updatedPharmacies = [...existingPharmacies, newPharmacy];
         localStorage.setItem('pharmacies', JSON.stringify(updatedPharmacies));
 
-        // Mostrar modal de éxito
         setModalInfo({
           isOpen: true,
           title: 'Registro Exitoso',
@@ -174,12 +186,14 @@ const FormLayout = () => {
         {step === 2 && <LegalRepresentative />}
         {step === 3 && <DocumentsSection />}
         {step === 4 && <CommentsSection />}
+
         <div className="flex justify-between pt-6 border-t mt-8">
           {step > 1 ? (
             <Button type="button" variant="secondary" onClick={prevStep}>
               Anterior
             </Button>
           ) : <div />}
+
           {step < totalSteps ? (
             <Button type="button" onClick={nextStep}>
               Siguiente
@@ -191,6 +205,7 @@ const FormLayout = () => {
           )}
         </div>
       </form>
+
       <Modal
         isOpen={modalInfo.isOpen}
         onClose={closeModal}

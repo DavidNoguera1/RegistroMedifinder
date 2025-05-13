@@ -1,5 +1,6 @@
 import Input from '../common/Input'
 import { useForm } from '../../contexts/FormContext'
+import { useEffect, useState } from 'react'
 
 const departments = [
   'Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bogotá D.C.', 'Bolívar', 'Boyacá',
@@ -11,7 +12,7 @@ const departments = [
 ]
 
 const citiesByDepartment = {
-'Amazonas': ['Leticia'],
+  'Amazonas': ['Leticia'],
   'Antioquia': ['Medellín', 'Bello', 'Itagüí', 'Envigado', 'Rionegro'],
   'Arauca': ['Arauca'],
   'Atlántico': ['Barranquilla'],
@@ -48,11 +49,32 @@ const citiesByDepartment = {
 
 const PharmacyInfo = () => {
   const { formData, updateFormData } = useForm()
+  const [nitError, setNitError] = useState('');
+  const [nitTouched, setNitTouched] = useState(false);
+
+  useEffect(() => {
+    if (!nitTouched || !formData.nit) {
+      setNitError('');
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      const existingPharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
+      const duplicate = existingPharmacies.some(p => p.nit === formData.nit);
+      if (duplicate) {
+        setNitError("Esta farmacia está en proceso de aprobación, no puede volver a rellenar el formulario.");
+      } else {
+        setNitError('');
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [formData.nit, nitTouched]);
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-primary border-b pb-2">Información de la Farmacia</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
           label="Nombre de la farmacia"
@@ -61,15 +83,23 @@ const PharmacyInfo = () => {
           onChange={(e) => updateFormData('pharmacyName', e.target.value)}
           required
         />
-        
-        <Input
-          label="NIT"
-          name="nit"
-          value={formData.nit}
-          onChange={(e) => updateFormData('nit', e.target.value)}
-          required
-        />
-        
+
+        <div>
+          <Input
+            label="NIT"
+            name="nit"
+            value={formData.nit}
+            onChange={(e) => {
+              updateFormData('nit', e.target.value)
+              setNitTouched(true)
+            }}
+            required
+          />
+          {nitError && (
+            <p className="text-sm text-danger mt-1">{nitError}</p>
+          )}
+        </div>
+
         <Input
           label="Dirección completa"
           name="address"
@@ -77,7 +107,7 @@ const PharmacyInfo = () => {
           onChange={(e) => updateFormData('address', e.target.value)}
           required
         />
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Departamento <span className="text-danger">*</span>
@@ -95,7 +125,7 @@ const PharmacyInfo = () => {
             ))}
           </select>
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Ciudad/Municipio <span className="text-danger">*</span>
@@ -114,7 +144,7 @@ const PharmacyInfo = () => {
             ))}
           </select>
         </div>
-        
+
         <Input
           label="Teléfono de contacto"
           name="phone"
@@ -123,7 +153,7 @@ const PharmacyInfo = () => {
           onChange={(e) => updateFormData('phone', e.target.value)}
           required
         />
-        
+
         <Input
           label="Correo electrónico"
           name="email"
